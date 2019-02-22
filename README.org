@@ -1,0 +1,22 @@
+* Description
+
+Visual buffer switching using a window grid:
+
+[[./images/grid-3.png]]
+
+* Installation
+
+For manual installation, clone the repository and call:
+
+#+BEGIN_SRC elisp
+(package-install-file "/path/to/buffer-expose.el")
+#+END_SRC
+
+* Config
+
+To use the default bindings defined in buffer-expose-mode-map
+use buffer-expose-mode:
+
+#+BEGIN_SRC elisp
+(buffer-expose-mode 1)
+#+END_SRC
