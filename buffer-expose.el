@@ -151,8 +151,8 @@ question as its argument."
   "Whether to hide headerlines of buffers in the overview."
   :type 'boolean)
 
-(defcustom buffer-expose-hide-regex nil
-  "Regex for buffer names which should be hidden."
+(defcustom buffer-expose-hide-regexes nil
+  "List of regexes for buffer names which should be hidden."
   :type 'string)
 
 (defcustom buffer-expose-hide-cursor t
@@ -286,7 +286,7 @@ Each entry holds per buffer information for reset.")
 
 (defun buffer-expose--filter-buffer-list (bl max &optional
                                       show-current
-                                      hide-regex
+                                      hide-regexes
                                       filter-fun)
   "Filter buffers for display.
 
@@ -297,8 +297,8 @@ MAX is the maximal number of buffers to use.
 SHOW-CURRENT:
 if non nil consider current buffer as well.
 
-HIDE-REGEX:
-don't add buffers matching this regex
+HIDE-REGEXES:
+don't add buffers matching any of regexes
 
 FILTER-FUN:
 buffers for which this function returns non-nil are ignored."
@@ -310,8 +310,10 @@ buffers for which this function returns non-nil are ignored."
                 (setq buffer (pop bl)))
       (when (and (or show-current
                      (not (eq buffer (current-buffer))))
-                 (or (not hide-regex)
-                     (not (string-match hide-regex (buffer-name buffer))))
+                 (or (not hide-regexes)
+                     (not (cl-find-if (lambda (regex)
+                                        (string-match regex (buffer-name buffer)))
+                                      hide-regexes)))
                  (not (minibufferp buffer))
                  (not (string-match "\\`\\*helm" (buffer-name buffer)))
                  (not (string-match "\\`\\*Completions" (buffer-name buffer)))
@@ -476,7 +478,7 @@ to `prefix-numeric-value' if non nil."
     (and (/= buffer-expose-max-num-buffers 0)
          buffer-expose-max-num-buffers)
     buffer-expose-show-current-buffer
-    buffer-expose-hide-regex)
+    buffer-expose-hide-regexes)
    (and max (prefix-numeric-value max))))
 
 (defun buffer-expose--init-map ()
