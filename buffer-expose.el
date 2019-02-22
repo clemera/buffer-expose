@@ -29,6 +29,8 @@
 
 ;;; Code:
 
+(require 'cl-lib)
+
 (defgroup buffer-expose nil
   "Show git info in dired."
   :group 'convenience
