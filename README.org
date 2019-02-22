@@ -14,9 +14,22 @@ For manual installation, clone the repository and call:
 
 * Config
 
-To use the default bindings defined in buffer-expose-mode-map
+To use the default bindings for switching buffers with buffer-expose
 use buffer-expose-mode:
 
 #+BEGIN_SRC elisp
 (buffer-expose-mode 1)
+#+END_SRC
+
+The default bindings are defined in buffer-expose-mode-map:
+
+#+BEGIN_SRC elisp
+(defvar buffer-expose-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "<s-tab>") 'buffer-expose)
+    (define-key map (kbd "<C-tab>") 'buffer-expose-stars)
+    (define-key map (kbd "C-c <C-tab>") 'buffer-expose-current-mode)
+    (define-key map (kbd "C-c C-d") 'buffer-expose-dired-buffers)
+    map)
+  "Mode map for `buffer-expose-mode'.")
 #+END_SRC
