@@ -41,7 +41,7 @@
     (define-key map (kbd "C-c <C-tab>") 'buffer-expose-current-mode)
     (define-key map (kbd "C-c C-d") 'buffer-expose-dired-buffers)
     map)
-  "Mode map for `buffer-expose-mode'.")
+  "Mode map for command `buffer-expose-mode'.")
 
 ;;;###autoload
 (define-minor-mode buffer-expose-mode
@@ -77,7 +77,7 @@ Should return the string to display.")
   :type '(repeat character))
 
 (defun buffer-expose-choose-default-action (buf)
-  "Restore inital window config and switch to choosen buffer."
+  "Restore inital window config and switch to choosen buffer BUF."
   (buffer-expose-reset)
   (switch-to-buffer buf))
 
@@ -107,14 +107,13 @@ which matches this criteria will be used for display."
   :type 'integer)
 
 (defcustom buffer-expose-max-num-buffers 0
-  "Maximal number of buffers to collect for buffer-expose view.
+  "Maximal number of buffers to collect for expose view.
 
 A value if 0 means no limit."
   :type 'integer)
 
 (defcustom buffer-expose-highlight-selected t
-  "Whether to highlight selected window in the overview
-with `buffer-expose-selected-face'."
+  "Whether to highlight selected window in the overview."
   :type 'boolean)
 
 (defcustom buffer-expose-show-current-buffer nil
@@ -318,7 +317,7 @@ buffers for which this function returns non-nil are ignored."
     (nreverse res)))
 
 (defun buffer-expose--get-rule (num max)
-  "Get buffer-expose display rule.
+  "Get expose display rule.
 
 The rule is choosen based on NUM number of buffers. and MAX
 amount of windows per page. If max is nil it defaults to
@@ -344,7 +343,7 @@ amount of windows per page. If max is nil it defaults to
         (push mode modes)))))
 
 (defun buffer-expose--get-mode-buffers (mode)
-  "Get all buffers with major-mode MODE."
+  "Get all buffers with ‘major-mode’ MODE."
   (let (bufs)
     (dolist (buf (buffer-list) (nreverse bufs))
       (when (eq mode (buffer-local-value 'major-mode buf))
@@ -381,7 +380,9 @@ Windows are orderd by `buffer-expose--next-window'."
           (buffer-expose--window-list))))
 
 (defun buffer-expose--create-empty-buffer (&optional name)
-  "Create buffer for empty window."
+  "Create buffer for empty window with name NAME.
+
+NAME defaults to `buffer-expose--empty-buffer-name'."
   (with-current-buffer (generate-new-buffer
                         (or name buffer-expose--empty-buffer-name))
     (setq buffer-read-only t)
@@ -439,7 +440,10 @@ Windows are orderd by `buffer-expose--next-window'."
            buffer-expose--empty-buffer-name))
 
 (defun buffer-expose-select-window (f &rest args)
-  "Advice for `select-window' for the overview."
+  "Advice for `select-window' for the overview.
+
+F is the original `select-window' function with its
+arguments ARGS."
   (let ((w (car args)))
     (if (buffer-expose--empty-window-p w)
         (message "Can not switch to empty window.")
@@ -450,9 +454,9 @@ Windows are orderd by `buffer-expose--next-window'."
 
 
 (defun buffer-expose-show-buffers (blist &optional max)
-  "Init buffer-expose and display grid of buffers.
+  "Init buffer expose and display grid of buffers.
 
-This function is intended to be used when creating new buffer-expose
+This function is intended to be used when creating new buffer expose
 commands.
 
 BLIST is the list of buffers to display.
@@ -500,6 +504,7 @@ to `prefix-numeric-value' if non nil."
   (message buffer-expose-key-hint))
 
 (defun buffer-expose--save-state ()
+  "Save current state."
   (setq buffer-expose--initial-window-config (current-window-configuration))
   ;; variables
   (dolist (var '(cursor-in-non-selected-windows
@@ -532,7 +537,7 @@ to `prefix-numeric-value' if non nil."
 
 
 (defun buffer-expose--show-buffers (blist max)
-  "Initalize buffer-expose and display first page.
+  "Initalize buffer expose and display first page.
 
 BLIST is the list of buffers to display.
 
@@ -543,9 +548,9 @@ MAX is the maximum of windows to display per page."
                 blist))
          (rule (buffer-expose--get-rule (length blist) max)))
     (cond ((not buffer-expose--buffer-list)
-           (error "No buffers to display."))
+           (error "No buffers to display"))
           ((not rule)
-           (error "No display rule found."))
+           (error "No display rule found"))
           ((not (cdr buffer-expose--buffer-list))
            (funcall buffer-expose-one-buffer-function
                     (car buffer-expose--buffer-list)))
@@ -610,7 +615,7 @@ MAX is the maximum of windows to display per page."
     (set (car var) (cdr var))))
 
 (defun buffer-expose-handle-mouse (e)
-  "Chosse clicked window."
+  "Chosse clicked window using event E."
   (interactive "e")
   (select-window (posn-window (event-start e)))
   (buffer-expose-choose))
@@ -633,7 +638,7 @@ MAX is the maximum of windows to display per page."
           (buffer-expose-fill-grid)
           ;; update the new window for highlighting
           (select-window (frame-first-window)))
-      (error "No next view available."))))
+      (error "No next view available"))))
 
 (defun buffer-expose-prev-page ()
   "Page to previous view."
@@ -645,7 +650,7 @@ MAX is the maximum of windows to display per page."
         (set-window-configuration (pop buffer-expose--next-stack))
         ;; for consistency with next-page make sure it behaves the same
         (select-window (frame-first-window)))
-    (error "No previous view available.")))
+    (error "No previous view available")))
 
 (defun buffer-expose-aw-switch-to-window (w)
   "Switch to choosen window W."
@@ -653,7 +658,7 @@ MAX is the maximum of windows to display per page."
   (buffer-expose-choose))
 
 (defun buffer-expose-ace-window ()
-  "Choose a window with ace-window."
+  "Choose a window with ‘ace-window’."
   (interactive)
   (if (not (require 'ace-window nil t))
       (user-error "Ace Windows not found")
@@ -916,8 +921,8 @@ F defaults to the currently selected window."
   (funcall buffer-expose-choose-action-func (current-buffer)))
 
 (defun buffer-expose-reset ()
-  (interactive)
   "Exit overview, restore and reset state."
+  (interactive)
   (setq exwm-input-line-mode-passthrough nil)
   (buffer-expose--set-current-buffer-background t)
   (when buffer-expose--cancel-overriding-map-function
