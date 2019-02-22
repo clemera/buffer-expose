@@ -308,6 +308,7 @@ buffers for which this function returns non-nil are ignored."
                      (not (string-match hide-regex (buffer-name buffer))))
                  (not (minibufferp buffer))
                  (not (string-match "\\`\\*helm" (buffer-name buffer)))
+                 (not (string-match "\\`\\*Completions" (buffer-name buffer)))
                  (not (string-match "\\` " (buffer-name buffer)))
                  (or (not filter-fun)
                      (with-current-buffer buffer
