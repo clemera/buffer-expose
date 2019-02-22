@@ -151,6 +151,10 @@ question as its argument."
   "Whether to hide headerlines of buffers in the overview."
   :type 'boolean)
 
+(defcustom buffer-expose-hide-regex nil
+  "Regex for buffer names which should be hidden."
+  :type 'string)
+
 (defcustom buffer-expose-hide-cursor t
   "Whether to hide cursors in the overview."
   :type 'boolean)
@@ -471,7 +475,8 @@ to `prefix-numeric-value' if non nil."
     blist
     (and (/= buffer-expose-max-num-buffers 0)
          buffer-expose-max-num-buffers)
-    buffer-expose-show-current-buffer)
+    buffer-expose-show-current-buffer
+    buffer-expose-hide-regex)
    (and max (prefix-numeric-value max))))
 
 (defun buffer-expose--init-map ()
