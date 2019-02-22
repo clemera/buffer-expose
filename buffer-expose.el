@@ -375,18 +375,20 @@ Windows are orderd by `buffer-expose--next-window'."
   "Create window grid with X columns, Y rows."
   (let ((window-min-width 0)
         (window-min-height 0)
-        (window-combination-resize t))
+        (window-combination-resize t)
+        (ws (list (selected-window))))
     (delete-other-windows)
     (dotimes (_ (1- x))
-      (split-window-horizontally)
+      (push (split-window-horizontally) ws)
       (dotimes (_ (1- y))
-        (split-window-vertically))
+        (push (split-window-vertically) ws))
       (other-window y))
     (dotimes (_ (1- y))
-      (split-window-vertically))
+      (push (split-window-vertically) ws))
     (balance-windows)
+    ;; TODO: order left to right
     (setq buffer-expose--window-list
-          (buffer-expose--window-list))))
+          (nreverse ws))))
 
 (defun buffer-expose--create-empty-buffer (&optional name)
   "Create buffer for empty window with name NAME.
@@ -805,13 +807,10 @@ F defaults to the first window of the overview."
 
 F defaults to the currently selected window."
   (let ((f (or f (selected-window)))
-        (w nil)
-        (nw nil))
+        (w nil))
     (or (window-in-direction 'right f)
         (when (setq w (window-in-direction 'below f))
-          (while (setq w (window-in-direction 'left w))
-            (setq nw w))
-          nw))))
+          (buffer-expose--first-window-in-row w)))))
 
 (defun buffer-expose--prev-window (&optional f)
   "Get previous window for window F.
