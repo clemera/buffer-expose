@@ -153,7 +153,7 @@ question as its argument."
 
 (defcustom buffer-expose-hide-regexes nil
   "List of regexes for buffer names which should be hidden."
-  :type 'string)
+  :type '(repeat string))
 
 (defcustom buffer-expose-hide-cursor t
   "Whether to hide cursors in the overview."
