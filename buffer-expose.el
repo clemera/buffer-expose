@@ -744,6 +744,19 @@ show per page, which defaults to `buffer-expose-max-num-windows'."
                      (nreverse (buffer-list)))
    max))
 
+(defun buffer-expose-no-stars (&optional max)
+  "Expose buffers of `buffer-list' omitting *special* ones.
+
+If MAX is given it determines the maximum number of windows to
+show per page, which defaults to
+`buffer-expose-max-num-windows'."
+  (interactive "P")
+  (buffer-expose-show-buffers
+   (cl-remove-if (lambda (buf)
+                   (string-match "\\`*" (buffer-name buf)))
+                 (buffer-list))
+   max))
+
 (defun buffer-expose-dired-buffers (&optional max)
   "Expose dired buffers of `buffer-list'.
 
