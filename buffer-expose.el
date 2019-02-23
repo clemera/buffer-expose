@@ -31,6 +31,19 @@
 
 (require 'cl-lib)
 
+;; optional dep
+(defvar exwm-input-line-mode-passthrough nil)
+(defvar aw-dispatch-function 'aw-dispatch-default)
+(defvar aw-ignored-buffers '("*Calc Trail*" "*LV*"))
+(defvar aw-background t)
+(defvar aw-keys '(?1 ?2 ?3 ?4 ?5 ?6 ?7 ?8 ?9))
+(declare-function aw-switch-to-window, "ext:ace-window")
+(declare-function aw--lead-overlay "ext:ace-window")
+(declare-function aw-select "ext:ace-window")
+(declare-function aw-update "ext:ace-window")
+(declare-function avy-handler-default "ext:avy")
+
+
 (defgroup buffer-expose nil
   "Show git info in dired."
   :group 'convenience
@@ -370,6 +383,8 @@ Windows are orderd by `buffer-expose--next-window'."
       (push w ws))
     (nreverse ws)))
 
+(defvar buffer-expose--window-list nil)
+
 
 (defun buffer-expose-create-grid (x y)
   "Create window grid with X columns, Y rows."
@@ -515,6 +530,8 @@ to `prefix-numeric-value' if non nil."
   ;; initil message how to use
   (message buffer-expose-key-hint))
 
+(defvar buffer-expose-fringe nil)
+
 (defun buffer-expose--save-state ()
   "Save current state."
   (setq buffer-expose--initial-window-config (current-window-configuration))
@@ -612,7 +629,7 @@ MAX is the maximum of windows to display per page."
 
 (defun buffer-expose-reset-modes ()
   "Reset modes."
-  (setq fring-mode (pop buffer-expose-fringe))
+  (setq fringe-mode (pop buffer-expose-fringe))
   (modify-frame-parameters
    nil  buffer-expose-fringe)
 
@@ -668,6 +685,7 @@ MAX is the maximum of windows to display per page."
   "Switch to choosen window W."
   (funcall #'aw-switch-to-window w)
   (buffer-expose-choose))
+
 
 (defun buffer-expose-ace-window ()
   "Choose a window with ‘ace-window’."
