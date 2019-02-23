@@ -52,9 +52,10 @@
 (defvar buffer-expose-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "<s-tab>") 'buffer-expose)
-    (define-key map (kbd "<C-tab>") 'buffer-expose-stars)
+    (define-key map (kbd "<C-tab>") 'buffer-expose-no-stars)
     (define-key map (kbd "C-c <C-tab>") 'buffer-expose-current-mode)
     (define-key map (kbd "C-c C-d") 'buffer-expose-dired-buffers)
+    (define-key map (kbd "C-c C-*") 'buffer-expose-stars)
     map)
   "Mode map for command `buffer-expose-mode'.")
 
