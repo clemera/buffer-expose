@@ -34,3 +34,12 @@ The default bindings are defined in buffer-expose-mode-map:
     map)
   "Mode map for command `buffer-expose-mode'.")
 #+END_SRC
+
+There are user options to customize which buffers are shown and you can easily
+write your own command, like this:
+
+#+BEGIN_SRC elisp
+(defun my-expose-command (&optional max)
+  (interactive "P")
+  (buffer-expose-show-buffers <your-buffer-list> max))
+#+END_SRC
