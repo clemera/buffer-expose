@@ -379,7 +379,9 @@ amount of windows per page. If max is nil it defaults to
 (defvar buffer-expose--window-list nil)
 
 (defun buffer-expose-create-grid (x y)
-  "Create window grid with X columns, Y rows."
+  "Create window grid with X columns, Y rows.
+
+Return list of windows created."
   (let ((window-min-width 0)
         (window-min-height 0)
         (window-combination-resize t)
@@ -396,8 +398,7 @@ amount of windows per page. If max is nil it defaults to
       (push (split-window-horizontally) ws)
       (buffer-expose--other-window))
     (balance-windows)
-    (setq buffer-expose--window-list
-          (nreverse ws))))
+    (nreverse ws)))
 
 (defun buffer-expose--create-empty-buffer (&optional name)
   "Create buffer for empty window with name NAME.
@@ -456,8 +457,8 @@ NAME defaults to `buffer-expose--empty-buffer-name'."
 
 (defun buffer-expose--empty-window-p (w)
   "Check if window W is an empty one."
-  (string= (buffer-name (window-buffer w))
-           buffer-expose--empty-buffer-name))
+  (eq (window-buffer w)
+      (get-buffer buffer-expose--empty-buffer-name)))
 
 (defun buffer-expose-select-window (f &rest args)
   "Advice for `select-window' for the overview.
@@ -581,7 +582,8 @@ MAX is the maximum of windows to display per page."
            (let* ((cols (car rule))
                   (rows (cdr rule)))
              (buffer-expose--save-state)
-             (buffer-expose-create-grid cols rows)
+             (setq buffer-expose--window-list
+                   (buffer-expose-create-grid cols rows))
              (buffer-expose-fill-grid)
              (buffer-expose--init-ui))))))
 
@@ -654,10 +656,7 @@ MAX is the maximum of windows to display per page."
               (pop buffer-expose--prev-stack))
              (select-window (frame-first-window)))
     (if buffer-expose--buffer-list
-        ;; make sure the selected window is always the first
         (progn
-          ;; make sure the first window is selected for filling
-          (select-window (frame-first-window))
           (buffer-expose-fill-grid)
           ;; update the new window for highlighting
           (select-window (frame-first-window)))
