@@ -191,10 +191,10 @@ question as its argument."
     (define-key map (kbd "<right>") 'buffer-expose-right-window)
     (define-key map (kbd "f") 'buffer-expose-right-window)
     (define-key map (kbd "C-h k") 'describe-key)
-    (define-key map (kbd "p") 'windmove-up)
-    (define-key map (kbd "<up>") 'windmove-up)
-    (define-key map (kbd "<down>") 'windmove-down)
-    (define-key map (kbd "n") 'windmove-down)
+    (define-key map (kbd "p") 'buffer-expose-up-window)
+    (define-key map (kbd "<up>") 'buffer-expose-up-window)
+    (define-key map (kbd "<down>") 'buffer-expose-down-window)
+    (define-key map (kbd "n") 'buffer-expose-down-window)
     (define-key map (kbd "a") 'buffer-expose-first-window-in-row)
     (define-key map (kbd "e") 'buffer-expose-last-window-in-row)
     (define-key map (kbd "s") 'buffer-expose-switch-to-buffer)
@@ -892,6 +892,20 @@ F defaults to the currently selected window."
       (let ((row (buffer-expose--get-current-row)))
         (buffer-expose-next-page)
         (select-window (buffer-expose--get-window-in-row row))))))
+
+(defun buffer-expose-up-window ()
+  "Switch to window above."
+  (interactive)
+  (let ((w (window-in-direction 'above)))
+    (if w (select-window w)
+      (user-error "No window above current window"))))
+
+(defun buffer-expose-down-window ()
+  "Switch to window below."
+  (interactive)
+  (let ((w (window-in-direction 'below)))
+    (if w (select-window w)
+      (user-error "No window below current window"))))
 
 (defun buffer-expose-left-window ()
   "Switch to window at left side."
