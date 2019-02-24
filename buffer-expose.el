@@ -394,15 +394,17 @@ Windows are orderd by `buffer-expose--next-window'."
         (window-combination-resize t)
         (ws (list (selected-window))))
     (delete-other-windows)
+    (dotimes (_ (1- y))
+      (split-window-vertically)
+      (dotimes (_ (1- x))
+        (push (split-window-horizontally) ws)
+        (other-window 1))
+      (other-window 1)
+      (push (selected-window) ws))
     (dotimes (_ (1- x))
       (push (split-window-horizontally) ws)
-      (dotimes (_ (1- y))
-        (push (split-window-vertically) ws))
-      (other-window y))
-    (dotimes (_ (1- y))
-      (push (split-window-vertically) ws))
+      (other-window 1))
     (balance-windows)
-    ;; TODO: order left to right
     (setq buffer-expose--window-list
           (nreverse ws))))
 
