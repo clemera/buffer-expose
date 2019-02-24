@@ -190,7 +190,6 @@ question as its argument."
     (define-key map (kbd "b") 'buffer-expose-left-window)
     (define-key map (kbd "<right>") 'buffer-expose-right-window)
     (define-key map (kbd "f") 'buffer-expose-right-window)
-    (define-key map (kbd "C-h k") 'describe-key)
     (define-key map (kbd "p") 'buffer-expose-up-window)
     (define-key map (kbd "<up>") 'buffer-expose-up-window)
     (define-key map (kbd "<down>") 'buffer-expose-down-window)
@@ -373,20 +372,9 @@ amount of windows per page. If max is nil it defaults to
         (push buf bufs)))))
 
 
-(defun buffer-expose--window-list ()
-  "Get window list of current grid.
-
-Windows are orderd by `buffer-expose--next-window'."
-  (let ((ws ())
-        (w (frame-first-window)))
-    (push w ws)
-    (while (setq w (buffer-expose--next-window w))
-      (push w ws))
-    (nreverse ws)))
-
 (defun buffer-expose--other-window ()
-  (select-window (next-window (selected-window) 'never)
-                 :no-record))
+  (let ((w (next-window (selected-window) 'never)))
+    (select-window w :no-record)))
 
 (defvar buffer-expose--window-list nil)
 
@@ -961,17 +949,13 @@ F defaults to the currently selected window."
   (interactive)
   (let ((buf (window-buffer))
         (w (get-buffer-window)))
-    ;; move on in any direction possible
-    (cond ((window-in-direction 'right)
-           (windmove-right))
-          ((window-in-direction 'below)
-           (windmove-down))
-          ((window-in-direction 'left)
-           (windmove-left))
-          ((window-in-direction 'above)
-           (windmove-up)))
+    (select-window
+     (or (window-in-direction 'right)
+         (window-in-direction 'below)
+         (window-in-direction 'left)
+         (window-in-direction 'above)
+         (selected-window)))
     (kill-buffer buf)
-    ;; todo: on last one, reset
     (setf (window-buffer w)
           (get-buffer-create buffer-expose--empty-buffer-name))))
 
