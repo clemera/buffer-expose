@@ -384,55 +384,9 @@ Windows are orderd by `buffer-expose--next-window'."
       (push w ws))
     (nreverse ws)))
 
-(defun buffer-expose--other-window (count &optional all-frames)
-  "Like `other-window' but don't record."
-  (interactive "p")
-  (let* ((window (selected-window))
-         (function (and (not ignore-window-parameters)
-                        (window-parameter window 'other-window)))
-         old-window old-count)
-    (if (functionp function)
-        (funcall function count all-frames)
-      ;; `next-window' and `previous-window' may return a window we are
-      ;; not allowed to select.  Hence we need an exit strategy in case
-      ;; all windows are non-selectable.
-      (catch 'exit
-        (while (> count 0)
-          (setq window (next-window window nil all-frames))
-          (cond
-           ((eq window old-window)
-            (when (= count old-count)
-              ;; Keep out of infinite loops.  When COUNT has not changed
-              ;; since we last looked at `window' we're probably in one.
-              (throw 'exit nil)))
-           ((window-parameter window 'no-other-window)
-            (unless old-window
-              ;; The first non-selectable window `next-window' got us:
-              ;; Remember it and the current value of COUNT.
-              (setq old-window window)
-              (setq old-count count)))
-           (t
-            (setq count (1- count)))))
-        (while (< count 0)
-          (setq window (previous-window window nil all-frames))
-          (cond
-           ((eq window old-window)
-            (when (= count old-count)
-              ;; Keep out of infinite loops.  When COUNT has not changed
-              ;; since we last looked at `window' we're probably in one.
-              (throw 'exit nil)))
-           ((window-parameter window 'no-other-window)
-            (unless old-window
-              ;; The first non-selectable window `previous-window' got
-              ;; us: Remember it and the current value of COUNT.
-              (setq old-window window)
-              (setq old-count count)))
-           (t
-            (setq count (1+ count)))))
-
-        (select-window window :no-record)
-        ;; Always return nil.
-        nil))))
+(defun buffer-expose--other-window ()
+  (select-window (next-window (selected-window) 'never)
+                 :no-record))
 
 (defvar buffer-expose--window-list nil)
 
@@ -447,12 +401,12 @@ Windows are orderd by `buffer-expose--next-window'."
       (split-window-vertically)
       (dotimes (_ (1- x))
         (push (split-window-horizontally) ws)
-        (buffer-expose--other-window 1))
-      (buffer-expose--other-window 1)
+        (buffer-expose--other-window))
+      (buffer-expose--other-window)
       (push (selected-window) ws))
     (dotimes (_ (1- x))
       (push (split-window-horizontally) ws)
-      (buffer-expose--other-window 1))
+      (buffer-expose--other-window))
     (balance-windows)
     (setq buffer-expose--window-list
           (nreverse ws))))
