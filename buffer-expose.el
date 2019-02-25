@@ -330,7 +330,7 @@ HIDE-REGEXES:
 don't add buffers matching any of regexes
 
 FILTER-FUN:
-buffers for which this function returns non-nil are ignored."
+buffers for which this function returns nil are ignored."
   (let ((res ())
         (buffer nil)
         (n 0))
@@ -489,15 +489,21 @@ Prevents switching to empty windows. Does not change the order of
     (buffer-expose--update-display)))
 
 
-(defun buffer-expose-show-buffers (blist &optional max)
+(defun buffer-expose-show-buffers (blist &optional max regexes filter)
   "Init buffer expose and display grid of buffers.
 
 This function is intended to be used when creating new buffer expose
 commands.
 
 BLIST is the list of buffers to display.
+
 MAX is the maximum of windows to display per page and is passed
-to `prefix-numeric-value' if non nil."
+to `prefix-numeric-value' if non nil.
+
+REGEXES is a list of regexes for buffer names to hide.
+
+FILTER is a filter function which has to return non-nil for buffers
+which should be included."
   (buffer-expose--show-buffers
    ;; default filters
    (buffer-expose--filter-buffer-list
@@ -505,7 +511,8 @@ to `prefix-numeric-value' if non nil."
     (and (/= buffer-expose-max-num-buffers 0)
          buffer-expose-max-num-buffers)
     buffer-expose-show-current-buffer
-    buffer-expose-hide-regexes)
+    (append buffer-expose-hide-regexes regexes)
+    filter)
    (and max (prefix-numeric-value max))))
 
 (defun buffer-expose--init-map ()
@@ -775,6 +782,7 @@ defaults to `buffer-expose-max-num-windows'."
   (buffer-expose-show-buffers
    (buffer-expose--get-mode-buffers mode) max))
 
+
 (defun buffer-expose-stars (&optional max)
   "Expose *special* buffers of `buffer-list'.
 
@@ -782,12 +790,9 @@ If MAX is given it determines the maximum number of windows to
 show per page, which defaults to `buffer-expose-max-num-windows'."
   (interactive "P")
   (buffer-expose-show-buffers
-   (cl-remove-if-not (lambda (buf)
-                       (string-match "\\`*"
-                                     (buffer-name buf)))
-                     ;; get last buried first
-                     (nreverse (buffer-list)))
-   max))
+   ;; get last buried first
+   (nreverse (buffer-list)) max '("\\`[^*]")))
+
 
 (defun buffer-expose-no-stars (&optional max)
   "Expose buffers of `buffer-list' omitting *special* ones.
@@ -797,10 +802,8 @@ show per page, which defaults to
 `buffer-expose-max-num-windows'."
   (interactive "P")
   (buffer-expose-show-buffers
-   (cl-remove-if (lambda (buf)
-                   (string-match "\\`*" (buffer-name buf)))
-                 (buffer-list))
-   max))
+   (buffer-list) max '("\\`\\*")))
+
 
 (defun buffer-expose-dired-buffers (&optional max)
   "Expose dired buffers of `buffer-list'.
@@ -809,18 +812,19 @@ If MAX is given it determines the maximum number of windows to
 show per page, which defaults to `buffer-expose-max-num-windows'."
   (interactive "P")
   (buffer-expose-show-buffers
-   (cl-remove-if-not (lambda (buf)
-                       (eq (buffer-local-value 'major-mode buf)
-                           'dired-mode))
-                     ;; get last buried first
-                     (nreverse (buffer-list)))
-   max))
+   ;; get last buried first
+   (nreverse (buffer-list)) max nil
+   (lambda (buf)
+     (eq (buffer-local-value 'major-mode buf)
+         'dired-mode))))
 
 ;; * grid commands
 
 
 (defun buffer-expose--last-to (dir &optional f)
-  "Get last window in direction DIR from window F."
+  "Get last window in direction DIR from window F.
+
+F defaults to the currently selected window."
   (let ((w (or f (selected-window)))
         (nw nil))
     (while (setq w (window-in-direction dir w))
