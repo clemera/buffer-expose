@@ -460,18 +460,17 @@ NAME defaults to `buffer-expose--empty-buffer-name'."
   (eq (window-buffer w)
       (get-buffer buffer-expose--empty-buffer-name)))
 
-(defun buffer-expose-select-window (f &rest args)
-  "Advice for `select-window' for the overview.
+(defun buffer-expose--select-window (w)
+  "Select window W.
 
-F is the original `select-window' function with its
-arguments ARGS."
-  (let ((w (car args)))
-    (if (buffer-expose--empty-window-p w)
-        (message "Can not switch to empty window.")
-      ;; dont put buffer at front when selecting windows
-      (funcall f (car args) t)
-      ;; redisplay
-      (buffer-expose--update-display))))
+Prevents switching to empty windows. Does not change the order of
+`buffer-list'. After selection the grid view is updated."
+  (if (buffer-expose--empty-window-p w)
+      (message "Can not switch to empty window.")
+    ;; dont put buffer at front when selecting windows
+    (select-window w :no-record)
+    ;; redisplay
+    (buffer-expose--update-display)))
 
 
 (defun buffer-expose-show-buffers (blist &optional max)
@@ -519,9 +518,8 @@ to `prefix-numeric-value' if non nil."
     (with-current-buffer (window-buffer w)
       (redisplay)))
 
-  (advice-add 'select-window :around 'buffer-expose-select-window)
     ;; setup new window-switch behaviour
-  (select-window (frame-first-window))
+  (buffer-expose--select-window (frame-first-window))
   ;; initil message how to use
   (message buffer-expose-key-hint))
 
@@ -642,7 +640,7 @@ MAX is the maximum of windows to display per page."
 (defun buffer-expose-handle-mouse (e)
   "Chosse clicked window using event E."
   (interactive "e")
-  (select-window (posn-window (event-start e)))
+  (buffer-expose--select-window (posn-window (event-start e)))
   (buffer-expose-choose))
 
 (defun buffer-expose-next-page ()
@@ -654,12 +652,12 @@ MAX is the maximum of windows to display per page."
   (if buffer-expose--prev-stack
       (progn (set-window-configuration
               (pop buffer-expose--prev-stack))
-             (select-window (frame-first-window)))
+             (buffer-expose--select-window (frame-first-window)))
     (if buffer-expose--buffer-list
         (progn
           (buffer-expose-fill-grid)
           ;; update the new window for highlighting
-          (select-window (frame-first-window)))
+          (buffer-expose--select-window (frame-first-window)))
       (error "No next view available"))))
 
 (defun buffer-expose-prev-page ()
@@ -671,7 +669,7 @@ MAX is the maximum of windows to display per page."
               buffer-expose--prev-stack)
         (set-window-configuration (pop buffer-expose--next-stack))
         ;; for consistency with next-page make sure it behaves the same
-        (select-window (frame-first-window)))
+        (buffer-expose--select-window (frame-first-window)))
     (error "No previous view available")))
 
 (defun buffer-expose-aw-switch-to-window (w)
@@ -875,33 +873,33 @@ F defaults to the currently selected window."
   "Switch to window at right side."
   (interactive)
   (let ((w (window-in-direction 'right)))
-    (if w (select-window w)
+    (if w (buffer-expose--select-window w)
       (let ((row (buffer-expose--get-current-row)))
         (buffer-expose-next-page)
-        (select-window (buffer-expose--get-window-in-row row))))))
+        (buffer-expose--select-window (buffer-expose--get-window-in-row row))))))
 
 (defun buffer-expose-up-window ()
   "Switch to window above."
   (interactive)
   (let ((w (window-in-direction 'above)))
-    (if w (select-window w)
+    (if w (buffer-expose--select-window w)
       (user-error "No window above current window"))))
 
 (defun buffer-expose-down-window ()
   "Switch to window below."
   (interactive)
   (let ((w (window-in-direction 'below)))
-    (if w (select-window w)
+    (if w (buffer-expose--select-window w)
       (user-error "No window below current window"))))
 
 (defun buffer-expose-left-window ()
   "Switch to window at left side."
   (interactive)
   (let ((w (window-in-direction 'left)))
-    (if w (select-window w)
+    (if w (buffer-expose--select-window w)
       (let ((row (buffer-expose--get-current-row)))
         (buffer-expose-prev-page)
-        (select-window
+        (buffer-expose--select-window
          (buffer-expose--get-window-in-row
           row
           (buffer-expose--last-window-in-row (frame-first-window))))))))
@@ -910,45 +908,45 @@ F defaults to the currently selected window."
   "Switch to next window."
   (interactive)
   (let ((w (buffer-expose--next-window)))
-    (if w (select-window w)
+    (if w (buffer-expose--select-window w)
       (buffer-expose-next-page))))
 
 (defun buffer-expose-prev-window ()
   "Switch to previous window."
   (interactive)
   (let ((w (buffer-expose--prev-window)))
-    (if w (select-window w)
+    (if w (buffer-expose--select-window w)
       (buffer-expose-prev-page)
-      (select-window (buffer-expose--last-window)))))
+      (buffer-expose--select-window (buffer-expose--last-window)))))
 
 (defun buffer-expose-first-window-in-row ()
   "Switch to first window in current row."
   (interactive)
   (let ((w (buffer-expose--first-window-in-row)))
-    (when w (select-window w))))
+    (when w (buffer-expose--select-window w))))
 
 (defun buffer-expose-last-window-in-row ()
   "Switch to last window in current row."
   (interactive)
   (let ((w (buffer-expose--last-window-in-row)))
-    (when w (select-window w))))
+    (when w (buffer-expose--select-window w))))
 
 (defun buffer-expose-last-window ()
   "Select last window of overview."
   (interactive)
-  (select-window (buffer-expose--last-window)))
+  (buffer-expose--select-window (buffer-expose--last-window)))
 
 (defun buffer-expose-first-window ()
   "Select first window of overview."
   (interactive)
-  (select-window (frame-first-window)))
+  (buffer-expose--select-window (frame-first-window)))
 
 (defun buffer-expose-kill-buffer ()
   "Kill currently selected buffer."
   (interactive)
   (let ((buf (window-buffer))
         (w (get-buffer-window)))
-    (select-window
+    (buffer-expose--select-window
      (or (window-in-direction 'right)
          (window-in-direction 'below)
          (window-in-direction 'left)
@@ -970,7 +968,6 @@ F defaults to the currently selected window."
   (buffer-expose--set-current-buffer-background t)
   (when buffer-expose--cancel-overriding-map-function
     (funcall buffer-expose--cancel-overriding-map-function))
-  (advice-remove 'select-window 'buffer-expose-select-window)
   (set-window-configuration buffer-expose--initial-window-config)
   (buffer-expose-reset-buffers)
   (buffer-expose-reset-modes)
