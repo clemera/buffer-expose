@@ -31,9 +31,20 @@
 
 (require 'cl-lib)
 
-;; optional dep
+;; silence byte compiler
+(declare-function face-remap-remove-relative "ext:face-remap")
+;; optional deps
 (defvar exwm-input-line-mode-passthrough nil)
 (defvar aw-dispatch-function 'aw-dispatch-default)
+(defvar avy-dispatch-alist
+  '((?x . avy-action-kill-move)
+    (?X . avy-action-kill-stay)
+    (?t . avy-action-teleport)
+    (?m . avy-action-mark)
+    (?n . avy-action-copy)
+    (?y . avy-action-yank)
+    (?i . avy-action-ispell)
+    (?z . avy-action-zap-to-char)))
 (defvar aw-ignored-buffers '("*Calc Trail*" "*LV*"))
 (defvar aw-background t)
 (defvar aw-keys '(?1 ?2 ?3 ?4 ?5 ?6 ?7 ?8 ?9))
@@ -43,11 +54,7 @@
 (declare-function aw-update "ext:ace-window")
 (declare-function avy-handler-default "ext:avy")
 
-
-(defgroup buffer-expose nil
-  "Show git info in dired."
-  :group 'convenience
-  :prefix "buffer-expose-")
+;; * Minor mode
 
 (defvar buffer-expose-mode-map
   (let ((map (make-sparse-keymap)))
@@ -67,7 +74,12 @@ Instantiate bindings of `buffer-expose-mode-map'."
   :global t
   :keymap buffer-expose-mode-map)
 
-;; * Customize
+;; * Customization
+
+(defgroup buffer-expose nil
+  "Show git info in dired."
+  :group 'convenience
+  :prefix "buffer-expose-")
 
 (defface buffer-expose-selected-face '((t :inherit highlight))
   "Background face for selected window.")
@@ -150,10 +162,10 @@ A value if 0 means no limit."
     (1 . (1 . 1)))
   "Rules for the amount of windows and how to display them.
 
-Each entry defines the number of colums and the number of rows
-per page. If there is only one match
-`buffer-expose-one-buffer-function' is called with the buffer in
-question as its argument."
+The `car' contains the number of buffers to display and is mapped
+to a display rule. Each display rule is a cell (columns . rows)
+which defines the number of colums and the number of rows per
+page. See also `buffer-expose--get-rule'"
   :type '(alist :key-type integer
                 :value-type (cons interger interger)))
 
