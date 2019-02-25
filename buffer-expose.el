@@ -177,6 +177,10 @@ question as its argument."
   "Whether to hide cursors in other windows in the overview."
   :type 'boolean)
 
+(defcustom buffer-expose-wrap-vertically t
+  "Whether to wrap around on vertical movement."
+  :type 'boolean)
+
 (defcustom buffer-expose-key-hint
   (concat "Navigate with TAB, Shift-TAB, n, p, f, b, [, ]. "
           "Press RET, SPC or click to choose a buffer, q to abort. "
@@ -782,25 +786,35 @@ show per page, which defaults to `buffer-expose-max-num-windows'."
 
 ;; * grid commands
 
+(defun buffer-expose--first-window-in-col (&optional f)
+  "Get first window in column of window F.
 
+F defaults to the currently selected window."
+  (buffer-expose--last-to 'above f))
+
+(defun buffer-expose--last-window-in-col (&optional f)
+  "Get first window in column of window F.
+
+F defaults to the currently selected window."
+  (buffer-expose--last-to 'below f))
 
 (defun buffer-expose--first-window-in-row (&optional f)
   "Get first window in row of window F.
 
 F defaults to the currently selected window."
-  (let ((w (or f (selected-window)))
-        (nw nil))
-    (while (setq w (window-in-direction 'left w))
-      (setq nw w))
-    nw))
+  (buffer-expose--last-to 'left f))
 
 (defun buffer-expose--last-window-in-row (&optional f)
   "Get last window in row of window F.
 
 F defaults to the currently selected window."
+  (buffer-expose--last-to 'right f))
+
+(defun buffer-expose--last-to (dir &optional f)
+  "Get last window in direction DIR from window F."
   (let ((w (or f (selected-window)))
         (nw nil))
-    (while (setq w (window-in-direction 'right w))
+    (while (setq w (window-in-direction dir w))
       (setq nw w))
     nw))
 
@@ -869,28 +883,23 @@ F defaults to the currently selected window."
         (buffer-expose-reset)
         (switch-to-buffer buf)))))
 
-(defun buffer-expose-right-window ()
-  "Switch to window at right side."
-  (interactive)
-  (let ((w (window-in-direction 'right)))
-    (if w (buffer-expose--select-window w)
-      (let ((row (buffer-expose--get-current-row)))
-        (buffer-expose-next-page)
-        (buffer-expose--select-window (buffer-expose--get-window-in-row row))))))
-
 (defun buffer-expose-up-window ()
   "Switch to window above."
   (interactive)
   (let ((w (window-in-direction 'above)))
     (if w (buffer-expose--select-window w)
-      (user-error "No window above current window"))))
+      (if buffer-expose-wrap-vertically
+          (buffer-expose--select-window (buffer-expose--last-window-in-col))
+        (user-error "No window above current window")))))
 
 (defun buffer-expose-down-window ()
   "Switch to window below."
   (interactive)
   (let ((w (window-in-direction 'below)))
     (if w (buffer-expose--select-window w)
-      (user-error "No window below current window"))))
+      (if buffer-expose-wrap-vertically
+          (buffer-expose--select-window (buffer-expose--first-window-in-col))
+        (user-error "No window below current window")))))
 
 (defun buffer-expose-left-window ()
   "Switch to window at left side."
@@ -903,6 +912,16 @@ F defaults to the currently selected window."
          (buffer-expose--get-window-in-row
           row
           (buffer-expose--last-window-in-row (frame-first-window))))))))
+
+(defun buffer-expose-right-window ()
+  "Switch to window at right side."
+  (interactive)
+  (let ((w (window-in-direction 'right)))
+    (if w (buffer-expose--select-window w)
+      (let ((row (buffer-expose--get-current-row)))
+        (buffer-expose-next-page)
+        (buffer-expose--select-window
+         (buffer-expose--get-window-in-row row))))))
 
 (defun buffer-expose-next-window ()
   "Switch to next window."
