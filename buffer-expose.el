@@ -647,14 +647,27 @@ MAX is the maximum of windows to display per page."
   (buffer-expose--select-window (posn-window (event-start e)))
   (buffer-expose-choose))
 
+(defun buffer-expose--window-config ()
+  (let* ((w (frame-first-window))
+        (ws (list (cons w (window-buffer w)))))
+    (while (setq w (buffer-expose--next-window w))
+      (push (cons w (window-buffer w))
+            ws))
+    (nreverse ws)))
+
+(defun buffer-expose--restore-windows (confs)
+  (dolist (c confs)
+    (setf (window-buffer (car c))
+          (cdr c))))
+
 (defun buffer-expose-next-page ()
   "Page to next view."
   (interactive)
   (when (or buffer-expose--prev-stack
             buffer-expose--buffer-list)
-    (push (current-window-configuration) buffer-expose--next-stack))
+    (push (buffer-expose--window-config) buffer-expose--next-stack))
   (if buffer-expose--prev-stack
-      (progn (set-window-configuration
+      (progn (buffer-expose--restore-windows
               (pop buffer-expose--prev-stack))
              (buffer-expose--select-window (frame-first-window)))
     (if buffer-expose--buffer-list
@@ -669,9 +682,9 @@ MAX is the maximum of windows to display per page."
   (interactive)
   (if buffer-expose--next-stack
       (progn
-        (push (current-window-configuration)
+        (push (buffer-expose--window-config)
               buffer-expose--prev-stack)
-        (set-window-configuration (pop buffer-expose--next-stack))
+        (buffer-expose--restore-windows (pop buffer-expose--next-stack))
         ;; for consistency with next-page make sure it behaves the same
         (buffer-expose--select-window (frame-first-window)))
     (error "No previous view available")))
