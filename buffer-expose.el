@@ -876,7 +876,10 @@ F defaults to the currently selected window."
   (funcall buffer-expose--cancel-overriding-map-function)
   (let (buf)
     (unwind-protect
-        (setq buf (call-interactively buffer-expose-switch-to-buffer-func))
+        (progn
+          (buffer-expose--set-current-buffer-background t)
+          (setq buf
+                (call-interactively buffer-expose-switch-to-buffer-func)))
       (if (not buf)
           (progn (buffer-expose--set-current-buffer-background)
                  (buffer-expose--init-map))
