@@ -648,17 +648,23 @@ MAX is the maximum of windows to display per page."
   (buffer-expose-choose))
 
 (defun buffer-expose--window-config ()
+  "Return current window config.
+
+Window config is a list of (window . buffer) cells."
   (let* ((w (frame-first-window))
-        (ws (list (cons w (window-buffer w)))))
+         (conf (list (cons w (window-buffer w)))))
     (while (setq w (buffer-expose--next-window w))
       (push (cons w (window-buffer w))
-            ws))
-    (nreverse ws)))
+            conf))
+    (nreverse conf)))
 
-(defun buffer-expose--restore-windows (confs)
-  (dolist (c confs)
-    (setf (window-buffer (car c))
-          (cdr c))))
+(defun buffer-expose--restore-windows (conf)
+  "Restore window config CONF.
+
+Window config is a list of (window . buffer) cells."
+  (dolist (wb conf)
+    (setf (window-buffer (car wb))
+          (cdr wb))))
 
 (defun buffer-expose-next-page ()
   "Page to next view."
