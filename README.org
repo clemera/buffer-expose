@@ -1,3 +1,7 @@
+#+BEGIN_HTML
+<a href="https://elpa.gnu.org/packages/buffer-expose.html"><img alt="GNU ELPA" src="https://elpa.gnu.org/favicon.png"/></a>
+#+END_HTML
+
 * Description
 
 Visual buffer switching using a window grid:
