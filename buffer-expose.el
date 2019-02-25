@@ -697,6 +697,7 @@ Window config is a list of (window . buffer) cells."
 
 (defun buffer-expose-aw-switch-to-window (w)
   "Switch to choosen window W."
+  (buffer-expose--set-current-buffer-background t)
   (funcall #'aw-switch-to-window w)
   (buffer-expose-choose))
 
