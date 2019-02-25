@@ -786,6 +786,15 @@ show per page, which defaults to `buffer-expose-max-num-windows'."
 
 ;; * grid commands
 
+
+(defun buffer-expose--last-to (dir &optional f)
+  "Get last window in direction DIR from window F."
+  (let ((w (or f (selected-window)))
+        (nw nil))
+    (while (setq w (window-in-direction dir w))
+      (setq nw w))
+    nw))
+
 (defun buffer-expose--first-window-in-col (&optional f)
   "Get first window in column of window F.
 
@@ -809,14 +818,6 @@ F defaults to the currently selected window."
 
 F defaults to the currently selected window."
   (buffer-expose--last-to 'right f))
-
-(defun buffer-expose--last-to (dir &optional f)
-  "Get last window in direction DIR from window F."
-  (let ((w (or f (selected-window)))
-        (nw nil))
-    (while (setq w (window-in-direction dir w))
-      (setq nw w))
-    nw))
 
 (defun buffer-expose--get-current-row (&optional f)
   "Get row of window F.
