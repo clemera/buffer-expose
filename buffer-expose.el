@@ -1,6 +1,6 @@
 ;;; buffer-expose.el --- Visual buffer switching using a window grid  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2019  Clemens Radermacher
+;; Copyright (C) 2019  Free Software Foundation, Inc.
 
 ;; Author: Clemens Radermacher <clemera@posteo.net>
 ;; URL: https://github.com/clemera/buffer-expose
