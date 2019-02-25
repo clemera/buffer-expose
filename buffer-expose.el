@@ -389,6 +389,7 @@ corresponds to the number of buffers is choosen."
       (when (eq mode (buffer-local-value 'major-mode buf))
         (push buf bufs)))))
 
+;; * Grid
 
 (defun buffer-expose--other-window ()
   (let ((w (next-window (selected-window) 'never)))
@@ -611,7 +612,7 @@ MAX is the maximum of windows to display per page."
              (buffer-expose-fill-grid)
              (buffer-expose--init-ui))))))
 
-;;; Reset things
+;; * Reset state
 
 (defun buffer-expose-reset-buffers ()
   "Reset buffers."
@@ -663,12 +664,6 @@ MAX is the maximum of windows to display per page."
   (dolist (var buffer-expose--reset-variables)
     (set (car var) (cdr var))))
 
-(defun buffer-expose-handle-mouse (e)
-  "Chosse clicked window using event E."
-  (interactive "e")
-  (buffer-expose--select-window (posn-window (event-start e)))
-  (buffer-expose-choose))
-
 (defun buffer-expose--window-config ()
   "Return current window config.
 
@@ -688,67 +683,18 @@ Window config is a list of (window . buffer) cells."
     (setf (window-buffer (car wb))
           (cdr wb))))
 
-(defun buffer-expose-next-page ()
-  "Page to next view."
+(defun buffer-expose-reset ()
+  "Exit overview, restore and reset state."
   (interactive)
-  (when (or buffer-expose--prev-stack
-            buffer-expose--buffer-list)
-    (push (buffer-expose--window-config) buffer-expose--next-stack))
-  (if buffer-expose--prev-stack
-      (progn (buffer-expose--restore-windows
-              (pop buffer-expose--prev-stack))
-             (buffer-expose--select-window (frame-first-window)))
-    (if buffer-expose--buffer-list
-        (progn
-          (buffer-expose-fill-grid)
-          ;; update the new window for highlighting
-          (buffer-expose--select-window (frame-first-window)))
-      (error "No next view available"))))
-
-(defun buffer-expose-prev-page ()
-  "Page to previous view."
-  (interactive)
-  (if buffer-expose--next-stack
-      (progn
-        (push (buffer-expose--window-config)
-              buffer-expose--prev-stack)
-        (buffer-expose--restore-windows (pop buffer-expose--next-stack))
-        ;; for consistency with next-page make sure it behaves the same
-        (buffer-expose--select-window (frame-first-window)))
-    (error "No previous view available")))
-
-(defun buffer-expose-aw-switch-to-window (w)
-  "Switch to choosen window W."
+  (setq exwm-input-line-mode-passthrough nil)
   (buffer-expose--set-current-buffer-background t)
-  (funcall #'aw-switch-to-window w)
-  (buffer-expose-choose))
-
-
-(defun buffer-expose-ace-window ()
-  "Choose a window with ‘ace-window’."
-  (interactive)
-  (if (not (require 'ace-window nil t))
-      (user-error "Ace Windows not found")
-    (let* ((buffer-expose--ace-p t)
-           (aw-keys buffer-expose-aw-keys)
-           (aw-background nil)
-           (aw-ignored-buffers nil)
-           (avy-dispatch-alist nil)
-           (aw-dispatch-function #'avy-handler-default)
-           (foreground (face-attribute 'aw-leading-char-face :foreground)))
-      (cl-letf (((symbol-function #'aw--lead-overlay)
-                 #'ignore))
-      (unwind-protect
-            (progn (set-face-attribute 'aw-leading-char-face
-                                       nil
-                                       :foreground
-                                       (face-attribute 'default :background))
-                   (aw-update)
-                   (aw-select " " #'buffer-expose-aw-switch-to-window))
-          (set-face-attribute 'aw-leading-char-face
-                              nil
-                              :foreground
-                              foreground))))))
+  (when buffer-expose--cancel-overriding-map-function
+    (funcall buffer-expose--cancel-overriding-map-function))
+  (set-window-configuration buffer-expose--initial-window-config)
+  (buffer-expose-reset-buffers)
+  (buffer-expose-reset-modes)
+  (buffer-expose-reset-vars)
+  (buffer-expose-reset-vars-internal))
 
 ;; * Entry commands
 
@@ -821,7 +767,7 @@ show per page, which defaults to `buffer-expose-max-num-windows'."
      (eq (buffer-local-value 'major-mode buf)
          'dired-mode))))
 
-;; * grid commands
+;; * Grid navigation
 
 
 (defun buffer-expose--last-to (dir &optional f)
@@ -1003,6 +949,74 @@ F defaults to the currently selected window."
   (interactive)
   (buffer-expose--select-window (frame-first-window)))
 
+
+(defun buffer-expose-handle-mouse (e)
+  "Chosse clicked window using event E."
+  (interactive "e")
+  (buffer-expose--select-window (posn-window (event-start e)))
+  (buffer-expose-choose))
+
+(defun buffer-expose-aw-switch-to-window (w)
+  "Switch to choosen window W."
+  (buffer-expose--set-current-buffer-background t)
+  (funcall #'aw-switch-to-window w)
+  (buffer-expose-choose))
+
+(defun buffer-expose-ace-window ()
+  "Choose a window with ‘ace-window’."
+  (interactive)
+  (if (not (require 'ace-window nil t))
+      (user-error "Ace Windows not found")
+    (let* ((buffer-expose--ace-p t)
+           (aw-keys buffer-expose-aw-keys)
+           (aw-background nil)
+           (aw-ignored-buffers nil)
+           (avy-dispatch-alist nil)
+           (aw-dispatch-function #'avy-handler-default)
+           (foreground (face-attribute 'aw-leading-char-face :foreground)))
+      (cl-letf (((symbol-function #'aw--lead-overlay)
+                 #'ignore))
+      (unwind-protect
+            (progn (set-face-attribute 'aw-leading-char-face
+                                       nil
+                                       :foreground
+                                       (face-attribute 'default :background))
+                   (aw-update)
+                   (aw-select " " #'buffer-expose-aw-switch-to-window))
+          (set-face-attribute 'aw-leading-char-face
+                              nil
+                              :foreground
+                              foreground))))))
+
+(defun buffer-expose-next-page ()
+  "Page to next view."
+  (interactive)
+  (when (or buffer-expose--prev-stack
+            buffer-expose--buffer-list)
+    (push (buffer-expose--window-config) buffer-expose--next-stack))
+  (if buffer-expose--prev-stack
+      (progn (buffer-expose--restore-windows
+              (pop buffer-expose--prev-stack))
+             (buffer-expose--select-window (frame-first-window)))
+    (if buffer-expose--buffer-list
+        (progn
+          (buffer-expose-fill-grid)
+          ;; update the new window for highlighting
+          (buffer-expose--select-window (frame-first-window)))
+      (error "No next view available"))))
+
+(defun buffer-expose-prev-page ()
+  "Page to previous view."
+  (interactive)
+  (if buffer-expose--next-stack
+      (progn
+        (push (buffer-expose--window-config)
+              buffer-expose--prev-stack)
+        (buffer-expose--restore-windows (pop buffer-expose--next-stack))
+        ;; for consistency with next-page make sure it behaves the same
+        (buffer-expose--select-window (frame-first-window)))
+    (error "No previous view available")))
+
 (defun buffer-expose-kill-buffer ()
   "Kill currently selected buffer."
   (interactive)
@@ -1022,19 +1036,6 @@ F defaults to the currently selected window."
   "Choose buffer and exit overview."
   (interactive)
   (funcall buffer-expose-choose-action-func (current-buffer)))
-
-(defun buffer-expose-reset ()
-  "Exit overview, restore and reset state."
-  (interactive)
-  (setq exwm-input-line-mode-passthrough nil)
-  (buffer-expose--set-current-buffer-background t)
-  (when buffer-expose--cancel-overriding-map-function
-    (funcall buffer-expose--cancel-overriding-map-function))
-  (set-window-configuration buffer-expose--initial-window-config)
-  (buffer-expose-reset-buffers)
-  (buffer-expose-reset-modes)
-  (buffer-expose-reset-vars)
-  (buffer-expose-reset-vars-internal))
 
 
 (provide 'buffer-expose)
