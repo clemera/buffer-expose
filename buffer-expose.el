@@ -127,12 +127,11 @@ Takes one argument which is the buffer in question."
   "Command to use for `buffer-expose-switch-to-buffer' command."
   :type 'function)
 
-(defcustom buffer-expose-max-num-windows 15
+(defcustom buffer-expose-max-num-windows 12
   "Maximal number of windows per page to display.
 
-Numerical prefixes given to interactive commands usually allow to
-override this value. The first rule in `buffer-expose-grid-alist'
-which matches this criteria will be used for display."
+Numerical prefixes given to interactive commands allow to
+override this value."
   :type 'integer)
 
 (defcustom buffer-expose-max-num-buffers 0
@@ -142,11 +141,11 @@ A value if 0 means no limit."
   :type 'integer)
 
 (defcustom buffer-expose-highlight-selected t
-  "Whether to highlight selected window in the overview."
+  "Whether to highlight the selected window of the overview."
   :type 'boolean)
 
 (defcustom buffer-expose-show-current-buffer nil
-  "Whether to show the current buffer (on invokation) in the overview."
+  "Whether to show the current buffer (on invocation) in the overview."
   :type 'boolean)
 
 (defcustom buffer-expose-grid-alist
@@ -291,7 +290,7 @@ If RESET is non-nil reset the buffer background."
   "Storing the initial window configuration.")
 
 (cl-defstruct (buffer-expose--bdata (:constructor buffer-expose--bdata-create)
-                             (:copier nil))
+                                    (:copier nil))
   buffer
   cursor
   read-only
@@ -358,9 +357,11 @@ buffers for which this function returns nil are ignored."
 (defun buffer-expose--get-rule (num max)
   "Get expose display rule.
 
-The rule is choosen based on NUM number of buffers. and MAX
-amount of windows per page. If max is nil it defaults to
-`buffer-expose-max-num-windows'."
+The rule is choosen based on NUM number of buffers and MAX amount
+of windows per page (see `buffer-expose-grid-alist'). If MAX is
+nil it defaults to `buffer-expose-max-num-windows'. If there are
+less buffers available than windows the first rule which
+corresponds to the number of buffers is choosen."
   (let ((nums (mapcar 'car buffer-expose-grid-alist)))
     (while (and nums
                 ;; fewer buffers than rule
