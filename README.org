@@ -42,5 +42,6 @@ write your own command, like this:
 #+BEGIN_SRC elisp
 (defun my-expose-command (&optional max)
   (interactive "P")
-  (buffer-expose-show-buffers <your-buffer-list> max))
+  (buffer-expose-show-buffers
+    <your-buffer-list> max [<hide-regexes> <filter-func>]))
 #+END_SRC
