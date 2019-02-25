@@ -502,7 +502,8 @@ BLIST is the list of buffers to display.
 MAX is the maximum of windows to display per page and is passed
 to `prefix-numeric-value' if non nil.
 
-REGEXES is a list of regexes for buffer names to hide.
+REGEXES is a list of regexes for buffer names to hide and is merged with
+`buffer-expose-hide-regexes'.
 
 FILTER is a filter function which has to return non-nil for buffers
 which should be included."
