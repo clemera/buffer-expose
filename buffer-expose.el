@@ -392,6 +392,7 @@ corresponds to the number of buffers is choosen."
 ;; * Grid
 
 (defun buffer-expose--other-window ()
+  "Select `next-window' without affecting buffer list."
   (let ((w (next-window (selected-window) 'never)))
     (select-window w :no-record)))
 
