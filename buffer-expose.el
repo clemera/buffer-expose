@@ -1025,9 +1025,10 @@ F defaults to the currently selected window."
         (nw (buffer-expose--other-window)))
     (buffer-expose--select-window nw)
     (let ((overriding-terminal-local-map nil))
-      (when (kill-buffer buf)
-        (setf (window-buffer w)
-              (buffer-expose--create-empty-buffer))))))
+      (if (kill-buffer buf)
+          (setf (window-buffer w)
+                (buffer-expose--create-empty-buffer))
+        (buffer-expose--select-window w)))))
 
 (defun buffer-expose-choose ()
   "Choose buffer and exit overview."
