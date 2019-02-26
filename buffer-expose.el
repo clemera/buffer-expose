@@ -78,7 +78,7 @@ Instantiate bindings of `buffer-expose-mode-map'."
 ;; * Customization
 
 (defgroup buffer-expose nil
-  "Show git info in dired."
+  "Visual buffer switching using a window grid"
   :group 'convenience
   :prefix "buffer-expose-")
 
