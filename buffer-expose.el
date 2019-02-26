@@ -195,7 +195,7 @@ page. See also `buffer-expose--get-rule'"
 
 (defcustom buffer-expose-key-hint
   (concat "Navigate with TAB, Shift-TAB, n, p, f, b, [, ]. "
-          "Press RET, SPC or click to choose a buffer, q to abort. "
+          "Press RET, SPC or click to choose a buffer, k to kill, q to abort. "
           "See buffer-expose-grid-map for more.")
   "Help message when overview is shown."
   :type 'string)
