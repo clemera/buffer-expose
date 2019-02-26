@@ -220,6 +220,7 @@ page. See also `buffer-expose--get-rule'"
     (define-key map (kbd "<S-iso-lefttab>") 'buffer-expose-prev-window)
     (define-key map (kbd "]") 'buffer-expose-next-page)
     (define-key map (kbd "[") 'buffer-expose-prev-page)
+    (define-key map "k" 'buffer-expose-kill-buffer)
     map)
   "Transient keymap used for the overview.")
 
@@ -527,8 +528,6 @@ which should be included."
           (set-transient-map
            map
            (lambda ()
-             (when (not (lookup-key map (this-command-keys-vector)))
-               (message buffer-expose-key-hint))
              (not (lookup-key buffer-expose-exit-map (this-command-keys-vector))))))))
 
 (defun buffer-expose--init-ui ()
@@ -1022,16 +1021,13 @@ F defaults to the currently selected window."
   "Kill currently selected buffer."
   (interactive)
   (let ((buf (window-buffer))
-        (w (get-buffer-window)))
-    (buffer-expose--select-window
-     (or (window-in-direction 'right)
-         (window-in-direction 'below)
-         (window-in-direction 'left)
-         (window-in-direction 'above)
-         (selected-window)))
-    (kill-buffer buf)
-    (setf (window-buffer w)
-          (get-buffer-create buffer-expose--empty-buffer-name))))
+        (w (get-buffer-window))
+        (nw (buffer-expose--other-window)))
+    (buffer-expose--select-window nw)
+    (let ((overriding-terminal-local-map nil))
+      (when (kill-buffer buf)
+        (setf (window-buffer w)
+              (buffer-expose--create-empty-buffer))))))
 
 (defun buffer-expose-choose ()
   "Choose buffer and exit overview."
