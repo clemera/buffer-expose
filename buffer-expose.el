@@ -420,12 +420,15 @@ Return list of windows created."
     (balance-windows)
     (nreverse ws)))
 
+(defvar-local buffer-expose--empty-buffer nil)
+
 (defun buffer-expose--create-empty-buffer (&optional name)
   "Create buffer for empty window with name NAME.
 
 NAME defaults to `buffer-expose--empty-buffer-name'."
   (with-current-buffer (generate-new-buffer
                         (or name buffer-expose--empty-buffer-name))
+    (setq-local buffer-expose--empty-buffer t)
     (setq buffer-read-only t)
     (setq mode-line-format "")
     (setq cursor-type nil)
@@ -434,9 +437,7 @@ NAME defaults to `buffer-expose--empty-buffer-name'."
 
 (defun buffer-expose-fill-grid ()
   "Fill grid windows."
-  (let ((ws buffer-expose--window-list)
-        (emptybuffer (or (get-buffer buffer-expose--empty-buffer-name)
-                         (buffer-expose--create-empty-buffer))))
+  (let ((ws buffer-expose--window-list))
     (dolist (w ws)
       (if buffer-expose--buffer-list
           (with-current-buffer (pop buffer-expose--buffer-list)
@@ -473,24 +474,23 @@ NAME defaults to `buffer-expose--empty-buffer-name'."
                 (setq header-line-format nil))
 
             (setf (window-buffer w) (current-buffer)))
-        (setf (window-buffer w) emptybuffer)))))
+        (setf (window-buffer w)
+              (buffer-expose--create-empty-buffer))))))
 
 (defun buffer-expose--empty-window-p (w)
   "Check if window W is an empty one."
-  (eq (window-buffer w)
-      (get-buffer buffer-expose--empty-buffer-name)))
+  (with-current-buffer (window-buffer w)
+    buffer-expose--empty-buffer))
 
 (defun buffer-expose--select-window (w)
   "Select window W.
 
 Prevents switching to empty windows. Does not change the order of
 `buffer-list'. After selection the grid view is updated."
-  (if (buffer-expose--empty-window-p w)
-      (message "Can not switch to empty window.")
-    ;; dont put buffer at front when selecting windows
-    (select-window w :no-record)
-    ;; redisplay
-    (buffer-expose--update-display)))
+  ;; dont put buffer at front when selecting windows
+  (select-window w :no-record)
+  ;; redisplay
+  (buffer-expose--update-display))
 
 
 (defun buffer-expose-show-buffers (blist &optional max regexes filter)
