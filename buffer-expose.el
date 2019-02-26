@@ -614,7 +614,7 @@ MAX is the maximum of windows to display per page."
 
 ;; * Reset state
 
-(defun buffer-expose-reset-buffers ()
+(defun buffer-expose--reset-buffers ()
   "Reset buffers."
   ;; reset the seleted one
   ;; remove any previous ones...
@@ -637,7 +637,7 @@ MAX is the maximum of windows to display per page."
                 (buffer-expose--bdata-read-only data)))))))
 
 
-(defun buffer-expose-reset-vars-internal ()
+(defun buffer-expose--reset-vars-internal ()
   "Reset internal state tracking vars."
   (setq buffer-expose--next-stack nil
         buffer-expose--prev-stack nil
@@ -648,7 +648,7 @@ MAX is the maximum of windows to display per page."
         buffer-expose--reactivate-modes nil
         buffer-expose--reset-variables nil))
 
-(defun buffer-expose-reset-modes ()
+(defun buffer-expose--reset-modes ()
   "Reset modes."
   (setq fringe-mode (pop buffer-expose-fringe))
   (modify-frame-parameters
@@ -659,7 +659,7 @@ MAX is the maximum of windows to display per page."
   (dolist (mode buffer-expose--redisable-modes)
     (funcall mode -1)))
 
-(defun buffer-expose-reset-vars ()
+(defun buffer-expose--reset-vars ()
   "Reset buffer vars."
   (dolist (var buffer-expose--reset-variables)
     (set (car var) (cdr var))))
@@ -696,11 +696,11 @@ Window config is a list of (window . buffer) cells."
   (when buffer-expose--cancel-overriding-map-function
     (funcall buffer-expose--cancel-overriding-map-function))
   (set-window-configuration buffer-expose--initial-window-config)
-  (buffer-expose-reset-buffers)
+  (buffer-expose--reset-buffers)
   (buffer-expose--reset-empty-buffers)
-  (buffer-expose-reset-modes)
-  (buffer-expose-reset-vars)
-  (buffer-expose-reset-vars-internal))
+  (buffer-expose--reset-modes)
+  (buffer-expose--reset-vars)
+  (buffer-expose--reset-vars-internal))
 
 ;; * Entry commands
 
