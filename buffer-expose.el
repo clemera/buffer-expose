@@ -683,6 +683,11 @@ Window config is a list of (window . buffer) cells."
     (setf (window-buffer (car wb))
           (cdr wb))))
 
+(defun buffer-expose--reset-empty-buffers ()
+  (dolist (buf (buffer-list))
+    (when (buffer-local-value 'buffer-expose--empty-buffer buf)
+      (kill-buffer buf))))
+
 (defun buffer-expose-reset ()
   "Exit overview, restore and reset state."
   (interactive)
@@ -692,6 +697,7 @@ Window config is a list of (window . buffer) cells."
     (funcall buffer-expose--cancel-overriding-map-function))
   (set-window-configuration buffer-expose--initial-window-config)
   (buffer-expose-reset-buffers)
+  (buffer-expose--reset-empty-buffers)
   (buffer-expose-reset-modes)
   (buffer-expose-reset-vars)
   (buffer-expose-reset-vars-internal))
