@@ -1027,14 +1027,14 @@ F defaults to the currently selected window."
   "Kill currently selected buffer."
   (interactive)
   (let ((buf (window-buffer))
-        (w (get-buffer-window))
-        (nw (buffer-expose--other-window)))
-    (buffer-expose--select-window nw)
+        (w (get-buffer-window)))
     (let ((overriding-terminal-local-map nil))
-      (if (kill-buffer buf)
-          (setf (window-buffer w)
-                (buffer-expose--create-empty-buffer))
-        (buffer-expose--select-window w)))))
+      (when (kill-buffer buf)
+        (setq buffer-expose--selected-cookie nil)
+        (setf (window-buffer w)
+              (buffer-expose--create-empty-buffer))
+        (buffer-expose--other-window)
+        (buffer-expose--update-display)))))
 
 (defun buffer-expose-choose ()
   "Choose buffer and exit overview."
