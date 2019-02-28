@@ -4,7 +4,7 @@
 
 ;; Author: Clemens Radermacher <clemera@posteo.net>
 ;; URL: https://github.com/clemera/buffer-expose
-;; Version: 0.2
+;; Version: 0.3
 ;; Package-Requires: ((emacs "25") (cl-lib "0.5"))
 ;; Keywords: convenience
 
