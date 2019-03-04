@@ -969,6 +969,21 @@ F defaults to the currently selected window."
   (funcall #'aw-switch-to-window w)
   (buffer-expose-choose))
 
+(defun buffer-expose-ace-handler (char)
+  "Execute buffer-expose action for CHAR."
+  (cond ((memq char '(27 ?\C-g))
+         ;; exit silently
+         (throw 'done 'exit))
+        ((mouse-event-p char)
+         (signal 'user-error (list "Mouse event not handled" char)))
+        (t
+         (if (or (lookup-key buffer-expose-exit-map (vector char))
+                 (lookup-key buffer-expose-grid-map (vector char)))
+             (progn (call-interactively (key-binding (vector char)))
+                    (throw 'done 'exit))
+           (message "No such candidate: %s, hit `C-g' to quit."
+                    (if (characterp char) (string char) char))))))
+
 (defun buffer-expose-ace-window ()
   "Choose a window with ‘ace-window’."
   (interactive)
@@ -979,7 +994,7 @@ F defaults to the currently selected window."
            (aw-background nil)
            (aw-ignored-buffers nil)
            (avy-dispatch-alist nil)
-           (aw-dispatch-function #'avy-handler-default)
+           (aw-dispatch-function #'buffer-expose-ace-handler)
            (foreground (face-attribute 'aw-leading-char-face :foreground)))
       (cl-letf (((symbol-function #'aw--lead-overlay)
                  #'ignore))
