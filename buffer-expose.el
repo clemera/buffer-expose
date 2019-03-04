@@ -546,14 +546,17 @@ which should be included."
   (buffer-expose--init-map)
 
   ;; some buffers (dired and maybe more) need this to display correctly
-  (dolist (w (window-list nil 'nomini))
-    (with-current-buffer (window-buffer w)
-      (redisplay)))
 
-    ;; setup new window-switch behaviour
+
+  ;; setup new window-switch behaviour
   (buffer-expose--select-window (frame-first-window))
   ;; initil message how to use
-  (message buffer-expose-key-hint))
+  (message buffer-expose-key-hint)
+  (when buffer-expose-auto-init-aw
+    (buffer-expose-ace-window))
+  (dolist (w (window-list nil 'nomini))
+    (with-current-buffer (window-buffer w)
+      (redisplay))))
 
 (defvar buffer-expose-fringe nil)
 
@@ -615,9 +618,7 @@ MAX is the maximum of windows to display per page."
              (setq buffer-expose--window-list
                    (buffer-expose-create-grid cols rows))
              (buffer-expose-fill-grid)
-             (buffer-expose--init-ui)
-             (when buffer-expose-auto-init-aw
-               (buffer-expose-ace-window)))))))
+             (buffer-expose--init-ui))))))
 
 ;; * Reset state
 
@@ -1025,12 +1026,16 @@ F defaults to the currently selected window."
   (if buffer-expose--prev-stack
       (progn (buffer-expose--restore-windows
               (pop buffer-expose--prev-stack))
-             (buffer-expose--select-window (frame-first-window)))
+             (buffer-expose--select-window (frame-first-window))
+             (when buffer-expose-auto-init-aw
+               (buffer-expose-ace-window)))
     (if buffer-expose--buffer-list
         (progn
           (buffer-expose-fill-grid)
           ;; update the new window for highlighting
-          (buffer-expose--select-window (frame-first-window)))
+          (buffer-expose--select-window (frame-first-window))
+          (when buffer-expose-auto-init-aw
+            (buffer-expose-ace-window)))
       (error "No next view available"))))
 
 (defun buffer-expose-prev-page ()
@@ -1042,7 +1047,9 @@ F defaults to the currently selected window."
               buffer-expose--prev-stack)
         (buffer-expose--restore-windows (pop buffer-expose--next-stack))
         ;; for consistency with next-page make sure it behaves the same
-        (buffer-expose--select-window (frame-first-window)))
+        (buffer-expose--select-window (frame-first-window))
+        (when buffer-expose-auto-init-aw
+          (buffer-expose-ace-window)))
     (error "No previous view available")))
 
 (defun buffer-expose-kill-buffer ()
