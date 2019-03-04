@@ -101,7 +101,7 @@ Should return the string to display.")
   '((t :inherit font-lock-warning-face))
   "Face for avy chars in modelines.")
 
-(defcustom buffer-expose-aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l ?\;)
+(defcustom buffer-expose-aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l ?e ?i ?w ?o)
   "Keys for selecting windows with avy."
   :type '(repeat character))
 
@@ -463,7 +463,8 @@ NAME defaults to `buffer-expose--empty-buffer-name'."
                                        (buffer-expose--ace-p
                                         (:propertize
                                          (:eval (window-parameter (selected-window) 'ace-window-path))
-                                         face buffer-expose-ace-char-face))
+                                         face buffer-expose-ace-char-face)
+                                        " ")
                                        " "
                                        (:propertize (:eval (funcall buffer-expose-mode-line-title-func))
                                                     face buffer-expose-mode-line-face))))
