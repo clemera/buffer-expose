@@ -4,7 +4,7 @@
 
 * Description
 
-Visual buffer switching using a window grid (ace-window is optional):
+Visual buffer switching using a window grid ([[https://github.com/abo-abo/ace-window][ace-window ]]key hints are optional):
 
 [[./images/grid-aw.png]]
 
