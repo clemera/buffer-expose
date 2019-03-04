@@ -4,9 +4,7 @@
 
 * Description
 
-Visual buffer switching using a window grid:
-
-[[./images/grid-3.png]]
+Visual buffer switching using a window grid (ace-window is optional):
 
 [[./images/grid-aw.png]]
 
