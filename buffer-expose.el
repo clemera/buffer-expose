@@ -105,6 +105,10 @@ Should return the string to display.")
   "Keys for selecting windows with avy."
   :type '(repeat character))
 
+(defcustom buffer-expose-auto-init-aw nil
+  "Whether to start with ace-window activated."
+  :type 'boolean)
+
 (defun buffer-expose-choose-default-action (buf)
   "Restore inital window config and switch to choosen buffer BUF."
   (buffer-expose-reset)
@@ -611,7 +615,9 @@ MAX is the maximum of windows to display per page."
              (setq buffer-expose--window-list
                    (buffer-expose-create-grid cols rows))
              (buffer-expose-fill-grid)
-             (buffer-expose--init-ui))))))
+             (buffer-expose--init-ui)
+             (when buffer-expose-auto-init-aw
+               (buffer-expose-ace-window)))))))
 
 ;; * Reset state
 
