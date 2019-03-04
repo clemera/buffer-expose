@@ -8,6 +8,8 @@ Visual buffer switching using a window grid:
 
 [[./images/grid-3.png]]
 
+[[./images/grid-aw.png]]
+
 * Installation
 
 For manual installation, clone the repository and call:
