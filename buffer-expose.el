@@ -101,7 +101,7 @@ Should return the string to display.")
   '((t :inherit font-lock-warning-face))
   "Face for avy chars in modelines.")
 
-(defcustom buffer-expose-aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l ?e ?i ?w ?o)
+(defcustom buffer-expose-aw-keys '(?a ?d ?f ?g ?h ?j ?l ?e ?i ?w ?o ?c ?m)
   "Keys for selecting windows with avy."
   :type '(repeat character))
 
