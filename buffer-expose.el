@@ -220,6 +220,7 @@ page. See also `buffer-expose--get-rule'"
     (define-key map (kbd "<") 'buffer-expose-first-window)
     (define-key map (kbd ">") 'buffer-expose-last-window)
     (define-key map (kbd "SPC") 'buffer-expose-ace-window)
+    (define-key map (kbd "TAB") 'buffer-expose-next-window)
     (define-key map (kbd "<tab>") 'buffer-expose-next-window)
     (define-key map (kbd "<S-iso-lefttab>") 'buffer-expose-prev-window)
     (define-key map (kbd "]") 'buffer-expose-next-page)
@@ -984,12 +985,15 @@ F defaults to the currently selected window."
         ((mouse-event-p char)
          (signal 'user-error (list "Mouse event not handled" char)))
         (t
-         (if (or (lookup-key buffer-expose-exit-map (vector char))
-                 (lookup-key buffer-expose-grid-map (vector char)))
-             (progn (call-interactively (key-binding (vector char)))
-                    (throw 'done 'exit))
-           (message "No such candidate: %s, hit `C-g' to quit."
-                    (if (characterp char) (string char) char))))))
+         (require 'edmacro)
+         (let* ((key (kbd (edmacro-format-keys (vector char))))
+                (cmd (or (lookup-key buffer-expose-exit-map key)
+                         (lookup-key buffer-expose-grid-map key))))
+           (if cmd
+               (progn (call-interactively cmd)
+                      (throw 'done 'exit))
+             (message "No such candidate: %s, hit `C-g' to quit."
+                      (if (characterp char) (string char) char)))))))
 
 (defun buffer-expose-ace-window ()
   "Choose a window with ‘ace-window’."
