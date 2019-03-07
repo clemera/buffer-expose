@@ -159,11 +159,17 @@ A value if 0 means no limit."
     (18 . (6 . 3))
     (16 . (4 . 4))
     (12 . (4 . 3))
-    (8 . (4 . 2))
-    (6 . (3 . 2))
-    (4 . (2 . 2))
-    (2 . (2 . 1))
-    (1 . (1 . 1)))
+    (11 . (4 . 3))
+    (10 . (4 . 3))
+    (9  . (4 . 3))
+    (8  . (4 . 2))
+    (7  . (4 . 2))
+    (6  . (3 . 2))
+    (5  . (3 . 2))
+    (4  . (2 . 2))
+    (3  . (2 . 2))
+    (2  . (2 . 1))
+    (1  . (1 . 1)))
   "Rules for the amount of windows and how to display them.
 
 The `car' contains the number of buffers to display and is mapped
