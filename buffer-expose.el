@@ -169,9 +169,20 @@ A value if 0 means no limit."
 The `car' contains the number of buffers to display and is mapped
 to a display rule. Each display rule is a cell (columns . rows)
 which defines the number of colums and the number of rows per
-page. See also `buffer-expose--get-rule'"
+page. If you always want the same grid layout set
+`buffer-expose-default-rule'. See also `buffer-expose--get-rule'
+for the algorithm for choosing the layout rule."
   :type '(alist :key-type integer
                 :value-type (cons interger interger)))
+
+(defcustom buffer-expose-default-rule nil
+  "Default rule for grid layout.
+
+The rule format is a cell of (columns . rows) which defines the
+number of colums and the number of rows per page. If set the grid
+will always use this layout regardless how many buffers are
+available for display."
+  :type '(cons integer integer))
 
 (defcustom buffer-expose-hide-modelines nil
   "Whether to hide modelines in the overview."
@@ -367,18 +378,21 @@ The rule is choosen based on NUM number of buffers and MAX amount
 of windows per page (see `buffer-expose-grid-alist'). If MAX is
 nil it defaults to `buffer-expose-max-num-windows'. If there are
 less buffers available than windows the first rule which
-corresponds to the number of buffers is choosen."
-  (let ((nums (mapcar 'car buffer-expose-grid-alist)))
-    (while (and nums
-                ;; fewer buffers than rule
-                (or (< num (car nums))
-                    ;; qrule exceeds limit
-                    (> (car nums) (or max
-                                      buffer-expose-max-num-windows))))
-      (pop nums))
-    (when nums
-      (cdr (assq (car nums)
-                 buffer-expose-grid-alist)))))
+corresponds to the number of buffers in
+`buffer-expose-grid-alist' is choosen. This can be overidden by
+`buffer-expose-default-rule'."
+  (or buffer-expose-default-rule
+      (let ((nums (mapcar 'car buffer-expose-grid-alist)))
+        (while (and nums
+                    ;; fewer buffers than rule
+                    (or (< num (car nums))
+                        ;; qrule exceeds limit
+                        (> (car nums) (or max
+                                          buffer-expose-max-num-windows))))
+          (pop nums))
+        (when nums
+          (cdr (assq (car nums)
+                     buffer-expose-grid-alist))))))
 
 (defun buffer-expose--get-major-modes ()
   "Get a list of available major modes."
