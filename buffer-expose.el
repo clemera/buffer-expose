@@ -237,6 +237,7 @@ available for display."
     (define-key map (kbd "<") 'buffer-expose-first-window)
     (define-key map (kbd ">") 'buffer-expose-last-window)
     (define-key map (kbd "SPC") 'buffer-expose-ace-window)
+    (define-key map (kbd ",") 'buffer-expose-ace-window)
     (define-key map (kbd "TAB") 'buffer-expose-next-window)
     (define-key map (kbd "<tab>") 'buffer-expose-next-window)
     (define-key map (kbd "<S-iso-lefttab>") 'buffer-expose-prev-window)
@@ -999,7 +1000,7 @@ F defaults to the currently selected window."
 
 (defun buffer-expose-ace-handler (char)
   "Execute buffer-expose action for CHAR."
-  (cond ((memq char '(27 ?\C-g))
+  (cond ((memq char '(27 ?\C-g ?,))
          ;; exit silently
          (throw 'done 'exit))
         ((mouse-event-p char)
