@@ -592,16 +592,18 @@ which should be included."
     (push (cons var (symbol-value var))
           buffer-expose--reset-variables))
 
-  (let ((p (frame-parameters)))
-    (setq buffer-expose-fringe (list fringe-mode
-                              (assq 'left-fringe p)
-                              (assq 'right-fringe p))))
+  (when (boundp 'fringe-mode)
+    (let ((p (frame-parameters)))
+      (setq buffer-expose-fringe (list fringe-mode
+                                       (assq 'left-fringe p)
+                                       (assq 'right-fringe p)))))
 
   ;; minor modes
   (dolist (mode '(scroll-bar-mode window-divider-mode))
-    (if (symbol-value mode)
-        (push mode buffer-expose--reactivate-modes)
-      (push mode buffer-expose--redisable-modes)))
+    (when (boundp mode)
+      (if (symbol-value mode)
+          (push mode buffer-expose--reactivate-modes)
+        (push mode buffer-expose--redisable-modes))))
 
   (setq mouse-autoselect-window nil
         mouse-1-click-follows-link nil)
@@ -609,8 +611,10 @@ which should be included."
   (when buffer-expose-hide-cursor-in-other-windows
     (setq cursor-in-non-selected-windows nil))
 
-  (fringe-mode -1)
-  (scroll-bar-mode -1)
+  (when (fboundp 'fringe-mode)
+    (fringe-mode -1))
+  (when (fboundp 'scroll-bar-mode)
+    (scroll-bar-mode -1))
   (let ((window-divider-default-places t))
     (window-divider-mode 1)))
 
@@ -680,9 +684,10 @@ MAX is the maximum of windows to display per page."
 
 (defun buffer-expose--reset-modes ()
   "Reset modes."
-  (setq fringe-mode (pop buffer-expose-fringe))
-  (modify-frame-parameters
-   nil  buffer-expose-fringe)
+  (when (boundp 'fringe-mode)
+    (setq fringe-mode (pop buffer-expose-fringe))
+    (modify-frame-parameters
+     nil  buffer-expose-fringe))
 
   (dolist (mode buffer-expose--reactivate-modes)
     (funcall mode 1))
