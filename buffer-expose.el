@@ -416,6 +416,14 @@ corresponds to the number of buffers in
       (when (eq mode (buffer-local-value 'major-mode buf))
         (push buf bufs)))))
 
+(defun buffer-expose--get-project-buffers ()
+  "Get all buffers from `projectile-project-buffers'."
+  (if (not (require 'projectile nil t))
+      (user-error "Projectile not found")
+    (if (not (projectile-project-root))
+	(user-error "Not in project")
+      (projectile-project-buffers))))
+
 ;; * Grid
 
 (defun buffer-expose--other-window ()
@@ -807,6 +815,37 @@ show per page, which defaults to `buffer-expose-max-num-windows'."
    (lambda (buf)
      (eq (buffer-local-value 'major-mode buf)
          'dired-mode))))
+
+
+(defun buffer-expose-project (&optional max)
+  "Expose buffers of `projectile-project-buffers'.
+
+If MAX is given it determines the maximum number of windows to
+show per page, which defaults to `buffer-expose-max-num-windows'."
+  (interactive "P")
+  (buffer-expose-show-buffers
+   (buffer-expose--get-project-buffers) max))
+
+
+(defun buffer-expose-project-stars (&optional max)
+  "Expose *special* buffers of `projectile-project-buffers'.
+
+If MAX is given it determines the maximum number of windows to
+show per page, which defaults to `buffer-expose-max-num-windows'."
+  (interactive "P")
+  (buffer-expose-show-buffers
+   (buffer-expose--get-project-buffers) max '("\\`[^*]")))
+
+
+(defun buffer-expose-project-no-stars (&optional max)
+  "Expose buffers of `projectile-project-buffers' omitting *special* ones.
+
+If MAX is given it determines the maximum number of windows to
+show per page, which defaults to `buffer-expose-max-num-windows'."
+  (interactive "P")
+    (buffer-expose-show-buffers
+     (buffer-expose--get-project-buffers) max '("\\`\\*")))
+
 
 ;; * Grid navigation
 
