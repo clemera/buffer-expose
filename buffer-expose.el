@@ -33,26 +33,20 @@
 
 ;; silence byte compiler
 (declare-function face-remap-remove-relative "ext:face-remap")
-;; optional deps
-(defvar exwm-input-line-mode-passthrough nil)
-(defvar aw-dispatch-function 'aw-dispatch-default)
-(defvar avy-dispatch-alist
-  '((?x . avy-action-kill-move)
-    (?X . avy-action-kill-stay)
-    (?t . avy-action-teleport)
-    (?m . avy-action-mark)
-    (?n . avy-action-copy)
-    (?y . avy-action-yank)
-    (?i . avy-action-ispell)
-    (?z . avy-action-zap-to-char)))
-(defvar aw-ignored-buffers '("*Calc Trail*" "*LV*"))
-(defvar aw-background t)
-(defvar aw-keys '(?1 ?2 ?3 ?4 ?5 ?6 ?7 ?8 ?9))
+(declare-function projectile-project-root "ext:projectile")
+(declare-function projectile-project-buffers "ext:projectile")
 (declare-function aw-switch-to-window, "ext:ace-window")
 (declare-function aw--lead-overlay "ext:ace-window")
 (declare-function aw-select "ext:ace-window")
 (declare-function aw-update "ext:ace-window")
 (declare-function avy-handler-default "ext:avy")
+;; optional deps
+(defvar exwm-input-line-mode-passthrough)
+(defvar aw-dispatch-function)
+(defvar avy-dispatch-alist)
+(defvar aw-ignored-buffers)
+(defvar aw-background)
+(defvar aw-keys)
 
 ;; * Minor mode
 
