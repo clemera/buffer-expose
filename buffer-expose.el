@@ -741,6 +741,7 @@ Window config is a list of (window . buffer) cells."
 
 ;; * Entry commands
 
+;;;###autoload
 (defun buffer-expose (&optional max)
   "Expose buffers of `buffer-list'.
 
@@ -750,6 +751,7 @@ show per page, which defaults to `buffer-expose-max-num-windows'."
   (buffer-expose-show-buffers (buffer-list) max))
 
 
+;;;###autoload
 (defun buffer-expose-current-mode (&optional max)
   "Expose buffers with mode of current major mode.
 
@@ -760,6 +762,7 @@ defaults to `buffer-expose-max-num-windows'."
    (buffer-expose--get-mode-buffers major-mode) max))
 
 
+;;;###autoload
 (defun buffer-expose-major-mode (max mode)
   "Expose buffers with major mode MODE.
 
@@ -775,6 +778,7 @@ defaults to `buffer-expose-max-num-windows'."
    (buffer-expose--get-mode-buffers mode) max))
 
 
+;;;###autoload
 (defun buffer-expose-stars (&optional max)
   "Expose *special* buffers of `buffer-list'.
 
@@ -786,6 +790,7 @@ show per page, which defaults to `buffer-expose-max-num-windows'."
    (nreverse (buffer-list)) max '("\\`[^*]")))
 
 
+;;;###autoload
 (defun buffer-expose-no-stars (&optional max)
   "Expose buffers of `buffer-list' omitting *special* ones.
 
@@ -797,6 +802,7 @@ show per page, which defaults to
    (buffer-list) max '("\\`\\*")))
 
 
+;;;###autoload
 (defun buffer-expose-dired-buffers (&optional max)
   "Expose dired buffers of `buffer-list'.
 
@@ -811,6 +817,7 @@ show per page, which defaults to `buffer-expose-max-num-windows'."
          'dired-mode))))
 
 
+;;;###autoload
 (defun buffer-expose-project (&optional max)
   "Expose buffers of `projectile-project-buffers'.
 
@@ -821,6 +828,7 @@ show per page, which defaults to `buffer-expose-max-num-windows'."
    (buffer-expose--get-project-buffers) max))
 
 
+;;;###autoload
 (defun buffer-expose-project-stars (&optional max)
   "Expose *special* buffers of `projectile-project-buffers'.
 
@@ -831,6 +839,7 @@ show per page, which defaults to `buffer-expose-max-num-windows'."
    (buffer-expose--get-project-buffers) max '("\\`[^*]")))
 
 
+;;;###autoload
 (defun buffer-expose-project-no-stars (&optional max)
   "Expose buffers of `projectile-project-buffers' omitting *special* ones.
 
